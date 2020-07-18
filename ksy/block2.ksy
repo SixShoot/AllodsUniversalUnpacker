@@ -28,23 +28,39 @@ types:
     seq:
       - id: offset
         type: u4
-      - id: hash_index
+      - id: length
         type: u4
     instances:
       data:
         pos: offset + start
-        type: block1_data
+        type: block1_data(_io.pos)
+        repeat: expr
+        repeat-expr: length
   block1_data:
+    params:
+      - id: start
+        type: u4
     seq:
-      - id: length # more likely to be offset 
+      - id: offset
         type: u4
-      - id: data
+      - id: length
+        type: u4
+      - id: dbid
+        type: u4
+    instances:
+      value:
+        pos: offset + start
+        type: block1_value
         size: length
-      - id: ui
+  block1_value:
+    seq:
+      - id: delimiter
+        contents: [0x01, 0x00, 0x00, 0x00]
+      - id: adler32
         type: u4
-      - id: xdb
+      - id: filename
         type: strz
-        encoding: UTF-8    
+        encoding: UTF-8
   block2_entry:
     params:
       - id: start
@@ -75,7 +91,15 @@ types:
     instances:
       data:
         pos: offset + start
-        size: length * 8
+        type: block3_data
+        repeat: expr
+        repeat-expr: length
+  block3_data:
+    seq:
+      - id: resource_id
+        type: u4
+      - id: dbid
+        type: u4
   block4_entry:
     params:
       - id: start
@@ -88,7 +112,15 @@ types:
     instances:
       data:
         pos: offset + start
-        size: length * 8
+        type: block4_data
+        repeat: expr
+        repeat-expr: length
+  block4_data:
+    seq:
+      - id: dbid
+        type: u4
+      - id: resource_id
+        type: u4
 instances:
   block21:
     pos: offset1
